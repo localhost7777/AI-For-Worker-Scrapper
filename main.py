@@ -23,7 +23,7 @@ def write_to_csv(csv_file_path,data):
             print("file doesnt exists")
             writer.writerow(["Department", "Role", "Prompt","PromptText"])  # Write header row
         writer.writerows(data)        
-    print("Written "+data[0][2]+"\n")
+    # print("Written "+data[0][2]+"\n")
 
 def get_department_links(driver):
     department_title = ""
@@ -45,9 +45,12 @@ def get_department_links(driver):
     for department in department_data:
         for role in get_roles_links(department.link,driver):
             for prompt in get_prompts_links(role.link,driver):
+                
+                print(prompt.link)
                 prompt_content = get_prompts_content(prompt.link,driver)
                 for_csv = []
                 for_csv.append([department.title,role.title,prompt.title,prompt_content])
+                
                 write_to_csv("lol.csv",for_csv)
 
 def get_roles_links(url,driver):
@@ -83,28 +86,26 @@ def get_prompts_links(url,driver):
     prompt_selector =  wait.until(EC.presence_of_all_elements_located((By.XPATH,prompt_xpath)))
     for prompt in prompt_selector:    
         prompt_link = prompt.get_attribute("href")
-        title_elements = prompt.find_elements(By.XPATH, prompt_title_xpath)
-        title = title_elements[0].get_attribute("innerHTML")
-        for title in title_elements:
-            prompt_title = title.get_attribute("innerHTML")
-            break
+        print(prompt_link)
+        text_element = prompt.find_element(By.XPATH, "./p[@class='prompt-txt']")
+        prompt_title = text_element.get_attribute("innerHTML")
         prompts_data.append(TitleLink(prompt_title,prompt_link))
-        if IS_DEBUG:
-            break
     return prompts_data
     
 
 
 def get_prompts_content(url,driver):
     driver.get(url)
-    prompts_text = []
     try:
         prompt_content_xpath = "//p[contains(@class, 'ms-comment')]"
         prompt_content_selector = wait.until(EC.presence_of_all_elements_located((By.XPATH,prompt_content_xpath)))
         for prompt in prompt_content_selector:
-            prompt_text = prompt.get_attribute("innerHTML")
-            if prompt_text.startswith('{'):
+            prompts_text = prompt.get_attribute("innerHTML")
+            if prompts_text.startswith('{'):
                 return prompt_text
+            else:
+                print(prompts_text)
+                print("No prompt found")
     except Exception:
         return ""
 
@@ -112,10 +113,11 @@ def get_prompts_content(url,driver):
 
 if __name__ == "__main__":
     options = Options()
-    options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36")
+    options.add_argument("--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Safari/605.1.1")
     url="https://www.aiforwork.co/"
     driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
     wait = WebDriverWait(driver, 10)
     driver.get(url)
     wait.until(EC.url_to_be(url))
+    
     get_department_links(driver)
