@@ -23,7 +23,7 @@ def write_to_csv(csv_file_path,data):
             print("file doesnt exists")
             writer.writerow(["Department", "Role", "Prompt","PromptText"])  # Write header row
         writer.writerows(data)        
-    # print("Written "+data[0][2]+"\n")
+    print("Written "+data[0][2]+"\n")
 
 def get_department_links(driver):
     department_title = ""
@@ -46,8 +46,9 @@ def get_department_links(driver):
         for role in get_roles_links(department.link,driver):
             for prompt in get_prompts_links(role.link,driver):
                 
-                print(prompt.link)
+                
                 prompt_content = get_prompts_content(prompt.link,driver)
+                print(prompt_content)
                 for_csv = []
                 for_csv.append([department.title,role.title,prompt.title,prompt_content])
                 
@@ -86,7 +87,6 @@ def get_prompts_links(url,driver):
     prompt_selector =  wait.until(EC.presence_of_all_elements_located((By.XPATH,prompt_xpath)))
     for prompt in prompt_selector:    
         prompt_link = prompt.get_attribute("href")
-        print(prompt_link)
         text_element = prompt.find_element(By.XPATH, "./p[@class='prompt-txt']")
         prompt_title = text_element.get_attribute("innerHTML")
         prompts_data.append(TitleLink(prompt_title,prompt_link))
@@ -99,12 +99,13 @@ def get_prompts_content(url,driver):
     try:
         prompt_content_xpath = "//p[contains(@class, 'ms-comment')]"
         prompt_content_selector = wait.until(EC.presence_of_all_elements_located((By.XPATH,prompt_content_xpath)))
-        for prompt in prompt_content_selector:
-            prompts_text = prompt.get_attribute("innerHTML")
+        for prompt_item in prompt_content_selector:
+            prompts_text = prompt_item.get_attribute("innerHTML")
             if prompts_text.startswith('{'):
-                return prompt_text
+                print("prompt found")
+                return prompt_item.get_attribute("innerHTML")
             else:
-                print(prompts_text)
+                
                 print("No prompt found")
     except Exception:
         return ""
