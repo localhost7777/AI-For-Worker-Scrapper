@@ -17,11 +17,12 @@ class TitleLink:
         self.link = link
 
 def write_to_csv(csv_file_path,data):
-    with open(csv_file_path, 'a', newline='') as file:
+    with open(csv_file_path, 'a', encoding='utf-8',newline='') as file:
         writer = csv.writer(file)
         if os.path.exists(csv_file_path) and os.stat(csv_file_path).st_size == 0: #Check if contains any content
             print("file doesnt exists")
             writer.writerow(["Department", "Role", "Prompt","PromptText"])  # Write header row
+        # print(data)
         writer.writerows(data)        
     print("Written "+data[0][2]+"\n")
 
@@ -48,7 +49,7 @@ def get_department_links(driver):
                 
                 
                 prompt_content = get_prompts_content(prompt.link,driver)
-                print(prompt_content)
+                # print(prompt_content)
                 for_csv = []
                 for_csv.append([department.title,role.title,prompt.title,prompt_content])
                 
