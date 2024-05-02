@@ -53,7 +53,7 @@ def get_department_links(driver):
                 for_csv = []
                 for_csv.append([department.title,role.title,prompt.title,prompt_content])
                 
-                write_to_csv("lol.csv",for_csv)
+                write_to_csv("result.csv",for_csv)
 
 def get_roles_links(url,driver):
     driver.get(url)
