@@ -2,7 +2,7 @@
 A script that scrapes all the prompts from all the available links using selenium in python
 
 ## TASK
-goto https://www.aiforwork.co/ select a department and a role and the prompt title will be shown and the user have to select one and will be redirect to the page which will give the prompt text
+goto https://www.aiforwork.co/ select a department and a role and the prompt title will be shown and the user have to select one and will be redirect to the page which will give the prompt text that is needed to scrape.
 however if the user is not logged in then the prompt text will be blocked by not login dialog box
 
 ## APPROACH
