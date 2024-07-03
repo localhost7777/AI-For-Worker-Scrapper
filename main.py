@@ -8,23 +8,38 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 import csv
 import os
+from airtable_integration import AirtableIntegration
+from dotenv import load_dotenv
 
-IS_DEBUG = True
+load_dotenv()
+
+IS_DEBUG = False
 
 class TitleLink:
     def __init__(self, title, link):
         self.title = title
         self.link = link
 
-def write_to_csv(csv_file_path,data):
-    with open(csv_file_path, 'a', encoding='utf-8',newline='') as file:
-        writer = csv.writer(file)
-        if os.path.exists(csv_file_path) and os.stat(csv_file_path).st_size == 0: #Check if contains any content
-            print("file doesnt exists")
-            writer.writerow(["Department", "Role", "Prompt","PromptText"])  # Write header row
-        # print(data)
-        writer.writerows(data)        
-    print("Written "+data[0][2]+"\n")
+def write_to_airtable(data):
+    try:
+        apiKey = os.getenv("AIRTABLE_API")
+        baseId = os.getenv("BASE_ID")
+        tableId = os.getenv("TABLE_ID")
+        print(apiKey,baseId)
+        # exit()
+        ati = AirtableIntegration(api_key=apiKey, base_id=baseId) 
+        #Identifier is the primaryKey field name
+        ati.publish(table_id=tableId,identifier="Prompt",data=data)
+    except Exception:
+        print("Failed to add to airtable...")
+        # with open("result.csv", 'a', encoding='utf-8',newline='') as file:
+        #     writer = csv.writer(file)
+        #     if os.path.exists("result.csv") and os.stat("result.csv").st_size == 0: #Check if contains any content
+        #         print("file doesnt exists")
+        #         writer.writerow(["Department", "Role", "Prompt","PromptText"])  # Write header row
+        #     # print(data)
+        #     writer.writerows([data["Department"],data["Role"],data["Prompt"],data["Prompt_Text"]])        
+    # print("Written "+data[0][2]+"\n")
 
 def get_department_links(driver):
     department_title = ""
@@ -50,10 +65,15 @@ def get_department_links(driver):
                 
                 prompt_content = get_prompts_content(prompt.link,driver)
                 # print(prompt_content)
-                for_csv = []
-                for_csv.append([department.title,role.title,prompt.title,prompt_content])
+                for_airtable_dict = {}
+                # for_csv = []
+                # for_csv.append([department.title,role.title,prompt.title,prompt_content])
+                for_airtable_dict["Department"]= department.title+""
+                for_airtable_dict["Role"] = role.title+""
+                for_airtable_dict["Prompt"] = prompt.title+""
+                for_airtable_dict["Prompt_Text"] = prompt_content+""
                 
-                write_to_csv("result.csv",for_csv)
+                write_to_airtable(for_airtable_dict)
 
 def get_roles_links(url,driver):
     driver.get(url)
